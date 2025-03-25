@@ -11,6 +11,7 @@ local AimbotKey = Enum.UserInputType.MouseButton2
 local AimSmoothness = 0.15
 local MaxFOV = 100
 local TeamCheck = true
+local PredictionAmount = 0.5  -- A variable for prediction amount
 
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
@@ -18,23 +19,24 @@ local Title = Instance.new("TextLabel")
 local ToggleButton = Instance.new("TextButton")
 local SmoothnessSlider = Instance.new("TextButton")
 local FOVSlider = Instance.new("TextButton")
+local PredictionSlider = Instance.new("TextButton")  -- Prediction Slider
 local Footer = Instance.new("TextLabel")
 
 ScreenGui.Parent = game.CoreGui
 ScreenGui.Name = "glock.lol"
 
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.BackgroundTransparency = 0.1
-MainFrame.Size = UDim2.new(0, 250, 0, 220)
-MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BackgroundTransparency = 0.2
+MainFrame.Size = UDim2.new(0, 250, 0, 290)
+MainFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
 local tweenIn = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {Position = UDim2.new(0.05, 0, 0.1, 0)})
@@ -90,6 +92,18 @@ FOVSlider.TextStrokeTransparency = 0.5
 FOVSlider.BorderSizePixel = 0
 FOVSlider.AutoButtonColor = true
 
+PredictionSlider.Parent = MainFrame
+PredictionSlider.Size = UDim2.new(0.8, 0, 0, 40)
+PredictionSlider.Position = UDim2.new(0.1, 0, 0.85, 0)  -- Prediction slider position
+PredictionSlider.Text = "Prediction: " .. PredictionAmount
+PredictionSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+PredictionSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+PredictionSlider.Font = Enum.Font.Gotham
+PredictionSlider.TextSize = 18
+PredictionSlider.TextStrokeTransparency = 0.5
+PredictionSlider.BorderSizePixel = 0
+PredictionSlider.AutoButtonColor = true
+
 Footer.Parent = MainFrame
 Footer.Text = "glock.lol | Aimbot"
 Footer.Size = UDim2.new(1, 0, 0, 30)
@@ -104,6 +118,7 @@ local FooterCorner = Instance.new("UICorner")
 FooterCorner.CornerRadius = UDim.new(0, 8)
 FooterCorner.Parent = Footer
 
+-- Hover effects
 local function onHover(button)
     local tween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
     tween:Play()
@@ -123,6 +138,60 @@ SmoothnessSlider.MouseLeave:Connect(function() offHover(SmoothnessSlider) end)
 FOVSlider.MouseEnter:Connect(function() onHover(FOVSlider) end)
 FOVSlider.MouseLeave:Connect(function() offHover(FOVSlider) end)
 
+PredictionSlider.MouseEnter:Connect(function() onHover(PredictionSlider) end)
+PredictionSlider.MouseLeave:Connect(function() offHover(PredictionSlider) end)
+
+-- Toggle Aimbot
+ToggleButton.MouseButton1Click:Connect(function()
+    AimbotEnabled = not AimbotEnabled
+    if AimbotEnabled then
+        ToggleButton.Text = "Aimbot: ON"
+    else
+        ToggleButton.Text = "Aimbot: OFF"
+    end
+end)
+
+-- Smoothness Slider Adjustments
+SmoothnessSlider.MouseButton1Click:Connect(function()
+    AimSmoothness = AimSmoothness + 0.05
+    if AimSmoothness > 1 then AimSmoothness = 0.1 end
+    SmoothnessSlider.Text = "Smoothness: " .. string.format("%.2f", AimSmoothness)
+end)
+
+-- FOV Slider Adjustments
+FOVSlider.MouseButton1Click:Connect(function()
+    MaxFOV = MaxFOV + 10
+    if MaxFOV > 200 then MaxFOV = 100 end
+    FOVSlider.Text = "FOV: " .. MaxFOV
+end)
+
+-- Prediction Slider Adjustments
+PredictionSlider.MouseButton1Click:Connect(function()
+    PredictionAmount = PredictionAmount + 0.1
+    if PredictionAmount > 1 then PredictionAmount = 0.1 end
+    PredictionSlider.Text = "Prediction: " .. string.format("%.1f", PredictionAmount)
+end)
+
+-- Function to calculate prediction (optional, depending on your game mechanics)
+local function PredictPosition(target)
+    local targetVelocity = target.Velocity
+    return target.Position + targetVelocity * PredictionAmount
+end
+
+-- Aimbot function (use prediction in aimbot)
+RunService.RenderStepped:Connect(function()
+    if AimbotEnabled and UserInputService:IsMouseButtonPressed(AimbotKey) then
+        local closestEnemy = GetClosestEnemy()
+        if closestEnemy then
+            local targetPos = PredictPosition(closestEnemy)  -- Using prediction
+            local direction = (targetPos - Camera.CFrame.Position).unit
+            local newCFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPos), AimSmoothness)
+            Camera.CFrame = newCFrame
+        end
+    end
+end)
+
+-- Get the closest enemy function
 local function GetClosestEnemy()
     local closestEnemy = nil
     local closestDist = MaxFOV
@@ -145,15 +214,3 @@ local function GetClosestEnemy()
     end
     return closestEnemy
 end
-
-RunService.RenderStepped:Connect(function()
-    if AimbotEnabled and UserInputService:IsMouseButtonPressed(AimbotKey) then
-        local target = GetClosestEnemy()
-        if target then
-            local targetPos = target.Position
-            local direction = (targetPos - Camera.CFrame.Position).unit
-            local newCFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPos), AimSmoothness)
-            Camera.CFrame = newCFrame
-        end
-    end
-end)
