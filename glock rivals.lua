@@ -6,14 +6,12 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
---// Aimbot Settings
 local AimbotEnabled = false
-local AimbotKey = Enum.UserInputType.MouseButton2 -- Right Click
+local AimbotKey = Enum.UserInputType.MouseButton2
 local AimSmoothness = 0.15
 local MaxFOV = 100
 local TeamCheck = true
 
---// Create GUI
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
@@ -35,12 +33,10 @@ MainFrame.Draggable = true
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 
--- UICorner for rounded corners
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
--- Animate Frame In
 local tweenIn = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {Position = UDim2.new(0.05, 0, 0.1, 0)})
 tweenIn:Play()
 
@@ -54,12 +50,10 @@ Title.TextSize = 24
 Title.TextAlignment = Enum.TextAlignment.Center
 Title.TextStrokeTransparency = 0.5
 
--- Title UICorner
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 8)
 TitleCorner.Parent = Title
 
--- Aimbot Toggle Button
 ToggleButton.Parent = MainFrame
 ToggleButton.Size = UDim2.new(0.8, 0, 0, 40)
 ToggleButton.Position = UDim2.new(0.1, 0, 0.2, 0)
@@ -72,7 +66,6 @@ ToggleButton.TextStrokeTransparency = 0.5
 ToggleButton.BorderSizePixel = 0
 ToggleButton.AutoButtonColor = true
 
--- Smoothness Slider Button
 SmoothnessSlider.Parent = MainFrame
 SmoothnessSlider.Size = UDim2.new(0.8, 0, 0, 40)
 SmoothnessSlider.Position = UDim2.new(0.1, 0, 0.45, 0)
@@ -85,7 +78,6 @@ SmoothnessSlider.TextStrokeTransparency = 0.5
 SmoothnessSlider.BorderSizePixel = 0
 SmoothnessSlider.AutoButtonColor = true
 
--- FOV Slider Button
 FOVSlider.Parent = MainFrame
 FOVSlider.Size = UDim2.new(0.8, 0, 0, 40)
 FOVSlider.Position = UDim2.new(0.1, 0, 0.7, 0)
@@ -98,7 +90,6 @@ FOVSlider.TextStrokeTransparency = 0.5
 FOVSlider.BorderSizePixel = 0
 FOVSlider.AutoButtonColor = true
 
--- Footer with info
 Footer.Parent = MainFrame
 Footer.Text = "glock.lol | Aimbot"
 Footer.Size = UDim2.new(1, 0, 0, 30)
@@ -109,12 +100,10 @@ Footer.Font = Enum.Font.Gotham
 Footer.TextSize = 14
 Footer.TextAlignment = Enum.TextAlignment.Center
 
--- Footer UICorner
 local FooterCorner = Instance.new("UICorner")
 FooterCorner.CornerRadius = UDim.new(0, 8)
 FooterCorner.Parent = Footer
 
--- Hover Effect for Buttons
 local function onHover(button)
     local tween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
     tween:Play()
@@ -134,7 +123,6 @@ SmoothnessSlider.MouseLeave:Connect(function() offHover(SmoothnessSlider) end)
 FOVSlider.MouseEnter:Connect(function() onHover(FOVSlider) end)
 FOVSlider.MouseLeave:Connect(function() offHover(FOVSlider) end)
 
--- Functions for Aimbot and Others
 local function GetClosestEnemy()
     local closestEnemy = nil
     local closestDist = MaxFOV
@@ -161,6 +149,11 @@ end
 RunService.RenderStepped:Connect(function()
     if AimbotEnabled and UserInputService:IsMouseButtonPressed(AimbotKey) then
         local target = GetClosestEnemy()
-        -- Aim at target here
+        if target then
+            local targetPos = target.Position
+            local direction = (targetPos - Camera.CFrame.Position).unit
+            local newCFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetPos), AimSmoothness)
+            Camera.CFrame = newCFrame
+        end
     end
 end)
