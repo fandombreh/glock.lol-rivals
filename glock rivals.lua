@@ -1,4 +1,3 @@
---// Aimbot GUI for Rivals FPS - Styled as "glock.lol" //--
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -27,14 +26,19 @@ ScreenGui.Parent = game.CoreGui
 ScreenGui.Name = "glock.lol"
 
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BackgroundTransparency = 0.1
-MainFrame.Size = UDim2.new(0, 250, 0, 200)
+MainFrame.Size = UDim2.new(0, 250, 0, 220)
 MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
+
+-- UICorner for rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
 
 -- Animate Frame In
 local tweenIn = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {Position = UDim2.new(0.05, 0, 0.1, 0)})
@@ -50,12 +54,17 @@ Title.TextSize = 24
 Title.TextAlignment = Enum.TextAlignment.Center
 Title.TextStrokeTransparency = 0.5
 
+-- Title UICorner
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
+TitleCorner.Parent = Title
+
 -- Aimbot Toggle Button
 ToggleButton.Parent = MainFrame
 ToggleButton.Size = UDim2.new(0.8, 0, 0, 40)
 ToggleButton.Position = UDim2.new(0.1, 0, 0.2, 0)
 ToggleButton.Text = "Aimbot: OFF"
-ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Font = Enum.Font.Gotham
 ToggleButton.TextSize = 18
@@ -68,7 +77,7 @@ SmoothnessSlider.Parent = MainFrame
 SmoothnessSlider.Size = UDim2.new(0.8, 0, 0, 40)
 SmoothnessSlider.Position = UDim2.new(0.1, 0, 0.45, 0)
 SmoothnessSlider.Text = "Smoothness: " .. AimSmoothness
-SmoothnessSlider.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+SmoothnessSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 SmoothnessSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
 SmoothnessSlider.Font = Enum.Font.Gotham
 SmoothnessSlider.TextSize = 18
@@ -81,7 +90,7 @@ FOVSlider.Parent = MainFrame
 FOVSlider.Size = UDim2.new(0.8, 0, 0, 40)
 FOVSlider.Position = UDim2.new(0.1, 0, 0.7, 0)
 FOVSlider.Text = "FOV: " .. MaxFOV
-FOVSlider.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+FOVSlider.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 FOVSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
 FOVSlider.Font = Enum.Font.Gotham
 FOVSlider.TextSize = 18
@@ -100,7 +109,32 @@ Footer.Font = Enum.Font.Gotham
 Footer.TextSize = 14
 Footer.TextAlignment = Enum.TextAlignment.Center
 
---// Functions
+-- Footer UICorner
+local FooterCorner = Instance.new("UICorner")
+FooterCorner.CornerRadius = UDim.new(0, 8)
+FooterCorner.Parent = Footer
+
+-- Hover Effect for Buttons
+local function onHover(button)
+    local tween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)})
+    tween:Play()
+end
+
+local function offHover(button)
+    local tween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)})
+    tween:Play()
+end
+
+ToggleButton.MouseEnter:Connect(function() onHover(ToggleButton) end)
+ToggleButton.MouseLeave:Connect(function() offHover(ToggleButton) end)
+
+SmoothnessSlider.MouseEnter:Connect(function() onHover(SmoothnessSlider) end)
+SmoothnessSlider.MouseLeave:Connect(function() offHover(SmoothnessSlider) end)
+
+FOVSlider.MouseEnter:Connect(function() onHover(FOVSlider) end)
+FOVSlider.MouseLeave:Connect(function() offHover(FOVSlider) end)
+
+-- Functions for Aimbot and Others
 local function GetClosestEnemy()
     local closestEnemy = nil
     local closestDist = MaxFOV
@@ -126,4 +160,7 @@ end
 
 RunService.RenderStepped:Connect(function()
     if AimbotEnabled and UserInputService:IsMouseButtonPressed(AimbotKey) then
-        local target = GetClosest
+        local target = GetClosestEnemy()
+        -- Aim at target here
+    end
+end)
